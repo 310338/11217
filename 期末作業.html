@@ -1,0 +1,149 @@
+<html>
+<head>
+    <title>母雞下蛋</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin-top: 0px;
+            font-family: 'Lucida Sans', sans-serif;
+            text-align: center;
+        }
+        #gameContainer {
+            width: 800px;
+            height: 600px;
+            position: relative;
+            background-image: url('pic/grass.jpg'); 
+            background-size: cover; 
+            overflow: hidden;
+            margin: 0 auto;
+    
+        }
+        #chicken {
+            width: 60px;
+            height: 60px;
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-image: url('pic/chiken.png');
+            background-size: cover;
+        }
+        #basket {
+            width: 100px;
+            height: 50px;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background-image: url('pic/basket.png'); 
+            background-size: cover;
+        }
+        .egg {
+            width: 20px;
+            height: 30px;
+            position: absolute;
+            background-image: url('pic/egg.png'); 
+            background-size: cover;
+        }
+        #status {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            font-size: 18px;
+            color: black;
+        }
+    </style>
+    <script>
+        let chicken, basket, eggs = [], game_score = 0, game_over = false;
+
+        function gameInit() {
+            chicken = document.getElementById("chicken");
+            basket = document.getElementById("basket");
+            game_score = 0;
+            game_over = false;
+            updateScore();
+            setInterval(spawnEgg, 1000);
+            setInterval(moveEggs, 20);
+        }
+
+        function updateScore() {
+            document.getElementById("score").innerText = "分數: " + game_score;
+        }
+
+        function mykeydown(event) {
+            if (event.key == "ArrowLeft" && !game_over) {
+                moveChicken(-10);
+            } else if (event.key == "ArrowRight" && !game_over) {
+                moveChicken(10);
+            }
+        }
+
+        function moveChicken(distance) {
+            let newLeft = chicken.offsetLeft + distance;
+            if (newLeft >= 0 && newLeft <= (800 - chicken.offsetWidth)) {
+                chicken.style.left = newLeft + "px";
+            }
+        }
+
+        function spawnEgg() {
+            if (game_over) return;
+            let egg = document.createElement("div");
+            egg.className = "egg";
+            egg.pos = { x: chicken.offsetLeft + (chicken.offsetWidth / 2) - 10, y: chicken.offsetTop };
+            egg.style.left = egg.pos.x + "px";
+            egg.style.top = egg.pos.y + "px";
+            eggs.push(egg);
+            document.getElementById("gameContainer").appendChild(egg);
+        }
+
+        function moveEggs() {
+            if (game_over) return;
+
+            for (let i = 0; i < eggs.length; i++) {
+                let egg = eggs[i];
+                egg.pos.y += 5; // Egg falls down
+                egg.style.top = egg.pos.y + "px";
+
+                // Check if the egg hits the basket
+                if (egg.pos.y + egg.offsetHeight >= basket.offsetTop &&
+                    egg.pos.x + egg.offsetWidth >= basket.offsetLeft &&
+                    egg.pos.x <= basket.offsetLeft + basket.offsetWidth) {
+                    game_score++;
+                    updateScore();
+                    egg.remove();
+                    eggs.splice(i, 1);
+                    i--;
+                }
+
+                // Check if the egg falls off screen (game over)
+                if (egg.pos.y > 600) {
+                    gameOver();
+                }
+            }
+        }
+
+        function gameOver() {
+            if (!game_over) {
+                alert("遊戲結束！你的得分是: " + game_score);
+                game_over = true;
+            }
+        }
+
+        window.onload = function() {
+            gameInit();
+        }
+
+        window.onkeydown = mykeydown;
+    </script>
+</head>
+<body>
+    <h1>母雞下蛋</h1>
+    <div id="status">
+        <span id="score">分數: 0</span>
+    </div>
+    <div id="gameContainer">
+        <div id="chicken"></div>
+        <div id="basket"></div>
+    </div>
+</body>
+</html>
